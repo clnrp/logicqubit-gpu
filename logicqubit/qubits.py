@@ -280,6 +280,9 @@ class QubitRegister(Qubit):
     def __getitem__(self, key):
         return self.__reg[key-1]
 
+    def getQubits(self):
+        return self.__reg
+
     def X(self):
         for qubit in self.__reg:
             qubit.X()

@@ -26,5 +26,5 @@ q_reg[2].H()
 q_reg.X()
 q_reg.H()
 
-logicQuBit.Measure([q_reg[1], q_reg[2]])
+logicQuBit.Measure(q_reg.getQubits())
 logicQuBit.Plot()
