@@ -13,8 +13,9 @@ from logicqubit.hilbert import *
 
 class Gates(Hilbert):
 
-    def __init__(self, qubits_number):
+    def __init__(self, qubits_number, first_left):
         Gates.__qubits_number = qubits_number
+        Gates.__first_left = first_left
 
     def Matrix(self, input):
         if(self.getCuda()):
@@ -50,7 +51,7 @@ class Gates(Hilbert):
     def Z(self, target):
         M = self.Matrix([[1, 0], [0, -1]])
         list = self.getOrdListSimpleGate(target, M)
-        operator = self.kronkronProduct(list)
+        operator = self.kronProduct(list)
         return operator
 
     def V(self, target):
@@ -172,7 +173,11 @@ class Gates(Hilbert):
 
     def getOrdListSimpleGate(self, target, Gate):
         list = []
-        for i in range(1, Gates.__qubits_number+1):
+        if(Gates.__first_left):
+            plist = range(1, Gates.__qubits_number + 1)
+        else:
+            plist = reversed(range(1, Gates.__qubits_number+1))
+        for i in plist:
             if i == target:
                 list.append(Gate)
             else:
@@ -182,7 +187,11 @@ class Gates(Hilbert):
     def getOrdListCtrlGate(self, control, target, Gate):
         list1 = []
         list2 = []
-        for i in range(1, Gates.__qubits_number+1):
+        if(Gates.__first_left):
+            plist = range(1, Gates.__qubits_number + 1)
+        else:
+            plist = reversed(range(1, Gates.__qubits_number+1))
+        for i in plist:
             if i == control:
                 list1.append(self.P0())
                 list2.append(self.P1())
@@ -197,7 +206,11 @@ class Gates(Hilbert):
     def getOrdListCtrl2Gate(self, control1, control2, target, Gate):
         list1 = []
         list2 = []
-        for i in range(1, Gates.__qubits_number+1):
+        if(Gates.__first_left):
+            plist = range(1, Gates.__qubits_number + 1)
+        else:
+            plist = reversed(range(1, Gates.__qubits_number+1))
+        for i in plist:
             if i == control1 or i == control2:
                 list1.append(self.ID())
                 list2.append(self.P1())

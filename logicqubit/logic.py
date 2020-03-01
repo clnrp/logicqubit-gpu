@@ -20,12 +20,13 @@ class LogicQuBit(Qubits, Gates, Circuit):
     def __init__(self, qubits_number = 3, **kwargs):
         self.__cuda = kwargs.get('cuda', True)
         self.__symbolic = kwargs.get('symbolic', False)
+        self.__first_left = kwargs.get('first_left', False)
         self.__qubits_number = qubits_number
         if(self.__symbolic):
             self.__cuda = False
         super().setCuda(self.__cuda)
-        super().__init__(qubits_number, self.__symbolic)
-        Gates.__init__(self, qubits_number)
+        super().__init__(qubits_number, self.__symbolic, self.__first_left)
+        Gates.__init__(self, qubits_number, self.__first_left)
         Circuit.__init__(self)
 
     def X(self, target):
@@ -144,39 +145,52 @@ class LogicQuBit(Qubits, Gates, Circuit):
         else:
             print("qubit already measured!")
 
-    def Measure(self, target):
+    def Measure(self, target):  # dando erro quando medi todos qubits
         self.addOp("Measure", self.qubitsToList(target))
         #target.sort()
         self.setMeasuredQubits(target)
         density_m = self.DensityMatrix()
-        size_p = len(target)  # número de bits a ser medidos
-        size = 2 ** size_p
+        size_p = len(target)  # número de qubits a ser medidos
+        size = 2 ** size_p  # número de estados possíveis
         result = []
         for i in range(size):
             tlist = [self.ID() for tl in range(self.__qubits_number)]
-            blist = [i >> bl & 0x1 for bl in range(size_p)] # bits de cada i
+            blist = [i >> bl & 0x1 for bl in range(size_p)]  # bits de cada i
             cnt = 0
-            for j in range(self.__qubits_number):
-                if j + 1 == target[cnt]:
-                    if blist[cnt] == 0:
-                        tlist[j] = super().P0()
+            if (self.__first_left):
+                sing = 1
+                offset_list = 0
+                offset_cnt = 0
+                plist = range(self.__qubits_number)
+            else:
+                sing = -1
+                offset_list = self.__qubits_number-1
+                offset_cnt = len(target)-1
+                plist = reversed(range(self.__qubits_number))
+            for j in plist:
+                if j + 1 == target[offset_cnt+sing*cnt]:
+                    if blist[size_p-1-cnt] == 0:  # mais significativo primeiro
+                        tlist[offset_list+sing*j] = super().P0()
                     else:
-                        tlist[j] = super().P1()
+                        tlist[offset_list+sing*j] = super().P1()
                     cnt += 1
                     if (cnt >= size_p):
                         break
             M = self.kronProduct(tlist)
-            measure = (density_m * M).trace()
+            measure = (density_m * M).trace()  # valor esperado
             if(self.__cuda):
                 measure = measure.item().real
             result.append(measure)
         self.setMeasuredValues(result)
         return result
 
-    def Plot(self):
+    def Plot(self, big_endian=False):
         size_p = len(self.getMeasuredQubits())  # número de bits medidos
         size = 2 ** size_p
-        names = ["|" + "{0:b}".format(i).zfill(size_p) + ">" for i in range(size)]
+        if(big_endian):
+            names = ["|" + ''.join(list(reversed("{0:b}".format(i).zfill(size_p)))) + ">" for i in range(size)]
+        else:
+            names = ["|" + "{0:b}".format(i).zfill(size_p) + ">" for i in range(size)]
         values = self.getMeasuredValues()
         plt.bar(names, values)
         plt.suptitle('')

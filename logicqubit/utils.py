@@ -18,9 +18,13 @@ class Utils:
             return 0
 
     @staticmethod
-    def texfix(value, number):
+    def texfix(value, number, left=False):
         tex = sp.latex(value).replace(' \cdot ', '')
         for i in range(1, number+1):
-            tex = tex.replace(str(i) + 'a', 'a')
-            tex = tex.replace(str(i) + 'b', 'b')
+            if(left):
+                tex = tex.replace(str(i) + 'a', 'a')
+                tex = tex.replace(str(i) + 'b', 'b')
+            else:
+                tex = tex.replace(str(number+1-i) + 'a', 'a')
+                tex = tex.replace(str(number+1-i) + 'b', 'b')
         return tex

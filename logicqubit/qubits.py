@@ -16,9 +16,10 @@ from logicqubit.utils import *
 
 class Qubits(Hilbert):
 
-    def __init__(self, qubits_number, symbolic):
+    def __init__(self, qubits_number, symbolic, first_left):
         Qubits.__q_number = qubits_number
         Qubits.__symbolic = symbolic
+        Qubits.first_left = first_left
         Qubits.__number = 0
         Qubits.__used_qubits = []
         Qubits.__measured_qubits = []
@@ -26,8 +27,12 @@ class Qubits(Hilbert):
         if(not Qubits.__symbolic):
             Qubits.__psi = self.kronProduct([self.ket(0) for i in range(Qubits.__q_number)]) # o qubit 1 é o primeiro a esquerda
         else:
-            a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Qubits.__q_number + 1)])
-            b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Qubits.__q_number + 1)])
+            if(Qubits.first_left):
+                a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Qubits.__q_number + 1)])
+                b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Qubits.__q_number + 1)])
+            else:
+                a = sp.symbols([str(Qubits.__q_number+1-i) + "a" + str(i) + "_0" for i in reversed(range(1, Qubits.__q_number + 1))])
+                b = sp.symbols([str(Qubits.__q_number+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, Qubits.__q_number + 1))])
             Qubits.__psi = self.kronProduct([a[i]*self.ket(0)+b[i]*self.ket(1) for i in range(Qubits.__q_number)])
 
     def addQubit(self, id=None):
@@ -38,10 +43,7 @@ class Qubits(Hilbert):
                 else:
                     print("qubit already used!")
             else:
-                if(len(Qubits.__used_qubits) == 0):
-                    id = 1
-                else:
-                    id = self.getLowestIdAvailable()
+                id = self.getLowestIdAvailable()
                 Qubits.__used_qubits.append(id)
             return id
         else:
@@ -53,6 +55,12 @@ class Qubits(Hilbert):
         for i in Qubits.__used_qubits:
             all.remove(i)
         return min(all)
+
+    def getBiggestIdAvailable(self):
+        all = list(range(1, Qubits.__q_number + 1))
+        for i in Qubits.__used_qubits:
+            all.remove(i)
+        return max(all)
 
     def getQubitsNumber(self):
         return Qubits.__q_number
@@ -118,10 +126,16 @@ class Qubits(Hilbert):
     def setSymbolValuesForAll(self, a, b):
         if(Qubits.__symbolic):
             for i in range(1, Qubits.__q_number+1):
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                if (Qubits.first_left):
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                else:
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b)
         else:
             print("This session is not symbolic!")
 
@@ -129,10 +143,16 @@ class Qubits(Hilbert):
         if(Qubits.__symbolic):
             list_id = self.qubitsToList(id)
             for i in list_id:
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
-                Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                if (Qubits.first_left):
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                else:
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b)
         else:
             print("This session is not symbolic!")
 
@@ -140,7 +160,7 @@ class Qubits(Hilbert):
         if(not self.__symbolic):
             value = sp.latex(Qubits.__psi)
         else:
-            value = Utils.texfix(Qubits.__psi, self.__q_number)
+            value = Utils.texfix(Qubits.__psi, self.__q_number, Qubits.first_left)
 
         if(not simple):
             display(Math(value))

@@ -9,7 +9,7 @@ def iqft(logicQuBit, n): # transformada quântica de Fourier inversa
             logicQuBit.CU1(j, i, -pi/float(2**(i-j)))
         logicQuBit.H(i)
 
-logicQuBit  = LogicQuBit(10)
+logicQuBit  = LogicQuBit(5)
 
 n = 4
 phase = 11.0*pi/8.0
