@@ -156,9 +156,22 @@ class Qubits(Hilbert):
         else:
             print("This session is not symbolic!")
 
+    def setSymbolValue(self, id, symbol, value):
+        if(Qubits.__symbolic):
+            list_id = self.qubitsToList(id)
+            for i in list_id:
+                if (Qubits.first_left):
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_0", value)
+                    Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_1", value)
+                else:
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_0", value)
+                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_1", value)
+        else:
+            print("This session is not symbolic!")
+
     def PrintState(self, simple = False):
         if(not self.__symbolic):
-            value = sp.latex(Qubits.__psi)
+            value = Utils.vec2tex(Qubits.__psi)
         else:
             value = Utils.texfix(Qubits.__psi, self.__q_number, Qubits.first_left)
 

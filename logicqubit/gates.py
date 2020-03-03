@@ -67,7 +67,7 @@ class Gates(Hilbert):
         return operator
 
     def T(self, target):
-        M = self.Matrix([[1, 0], [0, (1+I)/sqrt(2)]]) # sqrt(S)
+        M = self.Matrix([[1, 0], [0, (1+1j)/sqrt(2)]]) # sqrt(S)
         list = self.getOrdListSimpleGate(target, M)
         operator = self.kronProduct(list)
         return operator
@@ -152,7 +152,7 @@ class Gates(Hilbert):
 
     def CU3(self, control, target, theta, phi, _lambda):
         M = self.Matrix([[cos(theta/2), -exp(1j*_lambda)*sin(theta/2)],
-                    [exp(I*phi)*sin(theta/2), exp(1j*(phi+_lambda))*cos(theta/2)]])
+                    [exp(1j*phi)*sin(theta/2), exp(1j*(phi+_lambda))*cos(theta/2)]])
         list1,list2 = self.getOrdListCtrlGate(control, target, M)
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator
