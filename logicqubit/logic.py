@@ -130,8 +130,8 @@ class LogicQuBit(Qubits, Gates, Circuit):
         return density_m
 
     def Measure_One(self, target):
-        if(self.isNotMeasured(target)):
-            self.addOp("Measure", self.qubitsToList([target])[0])
+        if(not self.isMeasured(target)):
+            self.addOp("Measure", self.qubitsToList([target]))
             density_m = self.DensityMatrix()
             list = self.getOrdListSimpleGate(target, super().P0())
             P0 = self.kronProduct(list)
@@ -142,8 +142,6 @@ class LogicQuBit(Qubits, Gates, Circuit):
             self.setMeasuredQubits(target)
             self.setMeasuredValues([measure_0, measure_1])
             return [measure_0, measure_1]
-        else:
-            print("qubit already measured!")
 
     def Measure(self, target):  # dando erro quando medi todos qubits
         self.addOp("Measure", self.qubitsToList(target))
@@ -155,7 +153,7 @@ class LogicQuBit(Qubits, Gates, Circuit):
         result = []
         for i in range(size):
             tlist = [self.ID() for tl in range(self.__qubits_number)]
-            blist = [i >> bl & 0x1 for bl in range(size_p)]  # bits de cada i
+            blist = [i >> bl & 0x1 for bl in range(size_p)]  # bit list, bits de cada i
             cnt = 0
             if (self.__first_left):
                 sing = 1
@@ -186,15 +184,20 @@ class LogicQuBit(Qubits, Gates, Circuit):
 
     def Plot(self, big_endian=False):
         size_p = len(self.getMeasuredQubits())  # número de bits medidos
-        size = 2 ** size_p
-        if(big_endian):
-            names = ["|" + ''.join(list(reversed("{0:b}".format(i).zfill(size_p)))) + ">" for i in range(size)]
+        if(size_p > 0):
+            size = 2 ** size_p
+            if(big_endian):
+                names = ["|" + ''.join(list(reversed("{0:b}".format(i).zfill(size_p)))) + ">" for i in range(size)]
+            else:
+                names = ["|" + "{0:b}".format(i).zfill(size_p) + ">" for i in range(size)]
+            values = self.getMeasuredValues()
+            #plt.figure(figsize = (5, 3))
+            plt.bar(names, values)
+            plt.xticks(rotation=50)
+            plt.suptitle('')
+            plt.show()
         else:
-            names = ["|" + "{0:b}".format(i).zfill(size_p) + ">" for i in range(size)]
-        values = self.getMeasuredValues()
-        plt.bar(names, values)
-        plt.suptitle('')
-        plt.show()
+            print("No qubit measured!")
 
     def Pure(self):
         density_m = self.DensityMatrix()

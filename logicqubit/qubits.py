@@ -41,13 +41,13 @@ class Qubits(Hilbert):
                 if(not id in Qubits.__used_qubits):
                     Qubits.__used_qubits.append(id)
                 else:
-                    print("qubit already used!")
+                    print("Qubit already used!")
             else:
                 id = self.getLowestIdAvailable()
                 Qubits.__used_qubits.append(id)
             return id
         else:
-            print("all qubits have already been used!")
+            print("All qubits have already been used!")
             return None
 
     def getLowestIdAvailable(self):
@@ -82,6 +82,7 @@ class Qubits(Hilbert):
         if (isinstance(target, list)):
             for id in target:
                 if(id in Qubits.__measured_qubits):
+                    print("Qubit "+str(id)+" alredy measured!")
                     return True
         else:
             if(target in Qubits.__measured_qubits):
