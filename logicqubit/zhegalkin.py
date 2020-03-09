@@ -81,7 +81,7 @@ class Zhegalkin_Poly:
         binlist = self.BinList(len(x))
         for p in self.simplified_plist:
             terms = ''
-            for i in range(size_p**2):
+            for i in range(2**size_p):
                 if(short):
                     if(p[i]==1):
                         if(i != 0):

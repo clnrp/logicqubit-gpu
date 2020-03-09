@@ -13,9 +13,15 @@ from logicqubit.zhegalkin import *
 
 # 1 x 00, 1 x 10, 2 x 11
 
+#poly = Zhegalkin_Poly()
+#poly.addTable(['00','10','11'])
+#poly.addTable(['00','10'])
+#poly.Compute()
+#poly.ShowPolynomial()
+
 poly = Zhegalkin_Poly()
-poly.addTable(['00','10','11'])
-poly.addTable(['00','10'])
+poly.addTable(['000','001','011','111'])
+poly.addTable(['000','001','010','100'])
 poly.Compute()
 poly.ShowPolynomial()
 
