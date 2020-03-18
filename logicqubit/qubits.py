@@ -35,6 +35,12 @@ class Qubits(Hilbert):
                 b = sp.symbols([str(Qubits.__q_number+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, Qubits.__q_number + 1))])
             Qubits.__psi = self.kronProduct([a[i]*self.ket(0)+b[i]*self.ket(1) for i in range(Qubits.__q_number)])
 
+    def setState(self, state):
+        if (not Qubits.__symbolic):
+            Qubits.__psi = sp.Matrix(state)
+        else:
+            Qubits.__psi = cp.array(state)
+
     def addQubit(self, id=None):
         if(len(Qubits.__used_qubits) < Qubits.__q_number):
             if(id != None):

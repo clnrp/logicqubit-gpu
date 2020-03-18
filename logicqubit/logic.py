@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 from logicqubit.qubits import *
 from logicqubit.gates import *
 from logicqubit.circuit import *
+from logicqubit.zhegalkin import *
+from logicqubit.oracle import *
 from logicqubit.utils import *
 
 class LogicQuBit(Qubits, Gates, Circuit):
@@ -124,6 +126,32 @@ class LogicQuBit(Qubits, Gates, Circuit):
 
     def Toffoli(self, control1, control2, target):
         self.CCX(control1, control2, target)
+
+    def addOracle(self, oracle):
+        targets, input_qubits, truth_table = oracle.get()
+        poly = Zhegalkin_Poly()
+        for bits in truth_table:
+            poly.addTable(bits)
+        result = poly.Compute()
+        for target, p in enumerate(result):
+            for i, value in reversed(list(enumerate(p))):
+                if(value==1):
+                    blist = [int(i, base=2) for i in bin(i)[2:].zfill(len(input_qubits))]
+                    if(bin(i).count("1") == 2):
+                        try:
+                            q1 = blist.index(1)
+                            q2 = blist[q1+1:].index(1)+q1+1
+                            self.CCX(input_qubits[q1], input_qubits[q2], targets[target])
+                        except:
+                            print('fail')
+                    elif(bin(i).count("1")==1):
+                        try:
+                            q = blist.index(1)
+                            self.CX(input_qubits[q], targets[target])
+                        except:
+                            print('fail')
+                    elif(i==0):
+                        self.X(targets[target])
 
     def DensityMatrix(self):
         density_m = self.getPsi() * self.getPsiAdjoint()

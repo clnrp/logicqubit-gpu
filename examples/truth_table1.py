@@ -13,19 +13,13 @@ from logicqubit.zhegalkin import *
 
 # 1 x 00, 1 x 10, 2 x 11
 
-#poly = Zhegalkin_Poly()
-#poly.addTable(['00','10','11'])
-#poly.addTable(['00','10'])
-#poly.Compute()
-#poly.ShowPolynomial()
-
 poly = Zhegalkin_Poly()
-poly.addTable(['000','001','011','111'])
-poly.addTable(['000','001','010','100'])
+poly.addTable(['00', '10', '11'])
+poly.addTable(['00', '10'])
 poly.Compute()
 poly.ShowPolynomial()
 
-'''
+
 logicQuBit = LogicQuBit(8, first_left=True)
 
 x1 = Qubit()
@@ -41,16 +35,15 @@ x2.H()
 
 # p/ y1
 #p00+p10+p11 = (1,1,0,1)
+y1.CCX(x1, x2)
 y1.CX(x2)
 y1.X()
-y1.CCX(x1,x2)
 
 # p/ y2
 #p00+p10 = (1,1,0,0)
 y2.CX(x2)
 y2.X()
 
-res = logicQuBit.Measure([y1,y2])
+res = logicQuBit.Measure([y1, y2])
 
 logicQuBit.Plot()
-print(res)'''

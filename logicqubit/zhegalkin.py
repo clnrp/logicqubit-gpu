@@ -71,8 +71,7 @@ class Zhegalkin_Poly:
             for poly in self.plist[i][1:]:
                 _poly = self.SumPoly(_poly, poly)
             self.simplified_plist.append(_poly)
-
-        print(self.simplified_plist)
+        return self.simplified_plist
 
     def ShowPolynomial(self, short = True):
         poly = []
@@ -81,10 +80,10 @@ class Zhegalkin_Poly:
         binlist = self.BinList(len(x))
         for p in self.simplified_plist:
             terms = ''
-            for i in range(2**size_p):
+            for i in range(2**size_p):  # todos estados possíveis
                 if(short):
                     if(p[i]==1):
-                        if(i != 0):
+                        if(len(terms) > 0):
                             terms += "\\oplus "
                         for j in range(len(x)):
                             terms += x[j]+"^"+str(binlist[i][j])
@@ -92,7 +91,7 @@ class Zhegalkin_Poly:
                     if (i == 0):
                         terms += str(p[i])
                     else:
-                        terms += "\\oplus "
+                        terms += "\\oplus "+str(p[i])
                     for j in range(len(x)):
                         terms += x[j]+"^"+str(binlist[i][j])
             poly.append(terms)
