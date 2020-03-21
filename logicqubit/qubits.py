@@ -35,12 +35,6 @@ class Qubits(Hilbert):
                 b = sp.symbols([str(Qubits.__q_number+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, Qubits.__q_number + 1))])
             Qubits.__psi = self.kronProduct([a[i]*self.ket(0)+b[i]*self.ket(1) for i in range(Qubits.__q_number)])
 
-    def setState(self, state):
-        if (not Qubits.__symbolic):
-            Qubits.__psi = sp.Matrix(state)
-        else:
-            Qubits.__psi = cp.array(state)
-
     def addQubit(self, id=None):
         if(len(Qubits.__used_qubits) < Qubits.__q_number):
             if(id != None):
@@ -105,10 +99,21 @@ class Qubits(Hilbert):
         return Qubits.__symbolic == True
 
     def setPsi(self, psi):
-        Qubits.__psi = psi
+        if (not Qubits.__symbolic):
+            Qubits.__psi = sp.Matrix(psi)
+        else:
+            Qubits.__psi = cp.array(psi)
 
     def getPsi(self):
         return Qubits.__psi
+
+    def getPsiAtAngles(self, degree = False):
+        angles = []
+        if (not Qubits.__symbolic):
+            angles = cp.angle(Qubits.__psi)
+            if(degree):
+                angles = angles*180/pi
+        return angles
 
     def getPsiAdjoint(self):
         if(self.getCuda()):
