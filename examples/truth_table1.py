@@ -4,7 +4,7 @@
 from logicqubit.logic import *
 from logicqubit.zhegalkin import *
 
-# H|x1,x2>|0000>
+# H|x1,x2>|00>
 # x1 x2 y1 y2
 # 0  0  1  1
 # 0  1  0  0

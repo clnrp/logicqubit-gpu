@@ -119,6 +119,16 @@ class LogicQuBit(Qubits, Gates, Circuit):
         operator = super().CU1(control, target, _lambda)
         self.setOperation(operator)
 
+    def CU2(self, control, target, phi, _lambda):
+        self.addOp("CU2", self.qubitsToList([control, target, phi, _lambda]))
+        operator = super().CU2(control, target, phi, _lambda)
+        self.setOperation(operator)
+
+    def CU3(self, control, target, theta, phi, _lambda):
+        self.addOp("CU3", self.qubitsToList([control, target, theta, phi, _lambda]))
+        operator = super().CU3(control, target, theta, phi, _lambda)
+        self.setOperation(operator)
+
     def CCX(self, control1, control2, target):
         self.addOp("CCX", self.qubitsToList([control1, control2, target]))
         operator = super().CCX(control1, control2, target)
