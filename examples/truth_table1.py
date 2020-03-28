@@ -20,7 +20,7 @@ poly.Compute()
 poly.ShowPolynomial()
 
 
-logicQuBit = LogicQuBit(8, first_left=True)
+logicQuBit = LogicQuBit(5)
 
 x1 = Qubit()
 x2 = Qubit()

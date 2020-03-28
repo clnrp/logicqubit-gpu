@@ -181,10 +181,11 @@ class LogicQuBit(Qubits, Gates, Circuit):
             self.setMeasuredValues([measure_0, measure_1])
             return [measure_0, measure_1]
 
-    def Measure(self, target):  # dando erro quando medi todos qubits
-        self.addOp("Measure", self.qubitsToList(target))
-        #target.sort()
+    def Measure2(self, target):
+        target = self.qubitsToList(target)
         self.setMeasuredQubits(target)
+        target.sort()
+        self.addOp("Measure", target)
         density_m = self.DensityMatrix()
         size_p = len(target)  # número de qubits a ser medidos
         size = 2 ** size_p  # número de estados possíveis
@@ -212,6 +213,33 @@ class LogicQuBit(Qubits, Gates, Circuit):
                     cnt += 1
                     if (cnt >= size_p):
                         break
+            M = self.kronProduct(tlist)
+            measure = (density_m * M).trace()  # valor esperado
+            if(self.__cuda):
+                measure = measure.item().real
+            result.append(measure)
+        self.setMeasuredValues(result)
+        return result
+
+    def Measure(self, target):  # ex: medir de 5qubits: 2,1,4 do valor "010" -> M010 = |1><1| x |0><0| x 1 x |0><0| x 1
+        target = self.qubitsToList(target)
+        #target.reverse()
+        self.setMeasuredQubits(target)
+        self.addOp("Measure", target)
+        density_m = self.DensityMatrix()
+        size_p = len(target)  # número de qubits a ser medidos
+        size = 2 ** size_p  # número de estados possíveis
+        result = []
+        for i in range(size):
+            tlist = [self.ID() for tl in range(self.__qubits_number)]
+            blist = [i >> bl & 0x1 for bl in range(size_p)]  # bit list, bits de cada i
+            for j, value in enumerate(target):
+                if blist[j] == 0:  # mais significativo primeiro
+                    tlist[value-1] = super().P0()
+                else:
+                    tlist[value-1] = super().P1()
+            if (not self.__first_left):
+                tlist.reverse()
             M = self.kronProduct(tlist)
             measure = (density_m * M).trace()  # valor esperado
             if(self.__cuda):

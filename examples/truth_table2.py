@@ -4,7 +4,7 @@
 from logicqubit.logic import *
 from logicqubit.oracle import *
 
-logicQuBit = LogicQuBit(8, first_left=True)
+logicQuBit = LogicQuBit(8)
 
 x1 = Qubit()
 x2 = Qubit()
@@ -23,8 +23,7 @@ oracle.addTable(y2, ['000', '001', '010', '100'])
 
 logicQuBit.addOracle(oracle)
 
-logicQuBit.PrintOperations()
-
 res = logicQuBit.Measure([y1, y2])
+logicQuBit.PrintOperations()
 
 logicQuBit.Plot()
