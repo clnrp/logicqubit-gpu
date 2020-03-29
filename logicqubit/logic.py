@@ -221,9 +221,10 @@ class LogicQuBit(Qubits, Gates, Circuit):
         self.setMeasuredValues(result)
         return result
 
-    def Measure(self, target):  # ex: medir de 5qubits: 2,1,4 do valor "010" -> M010 = |1><1| x |0><0| x 1 x |0><0| x 1
+    def Measure(self, target, fisrt_msb = False):  # ex: medir 3 qubits de 5: 2,1,4 do estado "010" -> M010 = |1><1| x |0><0| x 1 x |0><0| x 1
         target = self.qubitsToList(target)
-        #target.reverse()
+        if(fisrt_msb):  # se fisrt_msb=True -> o primeiro da lista será o mais significativo
+            target.reverse()
         self.setMeasuredQubits(target)
         self.addOp("Measure", target)
         density_m = self.DensityMatrix()
