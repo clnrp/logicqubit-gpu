@@ -23,7 +23,7 @@ oracle.addTable(y2, ['000', '001', '010', '100'])
 
 logicQuBit.addOracle(oracle)
 
-res = logicQuBit.Measure([y1, y2])
+res = logicQuBit.Measure([y1, y2], True)
 logicQuBit.PrintOperations()
 
 logicQuBit.Plot()

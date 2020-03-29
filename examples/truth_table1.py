@@ -44,6 +44,6 @@ y1.X()
 y2.CX(x2)
 y2.X()
 
-res = logicQuBit.Measure([y1, y2])
+res = logicQuBit.Measure([y1, y2], True)
 
 logicQuBit.Plot()
