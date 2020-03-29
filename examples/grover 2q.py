@@ -3,7 +3,7 @@
 
 from logicqubit.logic import *
 
-logicQuBit  = LogicQuBit(2)
+logicQuBit = LogicQuBit(2)
 
 q_reg = QubitRegister(2)
 

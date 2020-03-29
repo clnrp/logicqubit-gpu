@@ -22,7 +22,7 @@ class LogicQuBit(Qubits, Gates, Circuit):
     def __init__(self, qubits_number = 3, **kwargs):
         self.__cuda = kwargs.get('cuda', True)
         self.__symbolic = kwargs.get('symbolic', False)
-        self.__first_left = kwargs.get('first_left', False)
+        self.__first_left = kwargs.get('first_left', True)
         self.__qubits_number = qubits_number
         if(self.__symbolic):
             self.__cuda = False
