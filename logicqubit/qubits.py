@@ -25,9 +25,9 @@ class Qubits(Hilbert):
         Qubits.__measured_qubits = []
         Qubits.__measured_values = []
         if(not Qubits.__symbolic):
-            Qubits.__psi = self.kronProduct([self.ket(0) for i in range(Qubits.__q_number)]) # o qubit 1 é o primeiro a esquerda
+            Qubits.__psi = self.kronProduct([self.ket(0) for i in range(Qubits.__q_number)])
         else:
-            if(Qubits.first_left):
+            if(Qubits.first_left):  # o qubit 1 é o primeiro a esquerda
                 a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Qubits.__q_number + 1)])
                 b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Qubits.__q_number + 1)])
             else:
@@ -255,9 +255,14 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().H(self.__id)
         self.setOperation(operator)
 
-    def U1(self, _lambda):
-        self.addOp("U1", self.qubitsToList([self.__id, _lambda]))
-        operator = super().U1(self.__id, _lambda)
+    def U(self, theta, phi, _lambda):
+        self.addOp("U", self.qubitsToList([self.__id, theta, phi, _lambda]))
+        operator = super().U(self.__id, theta, phi, _lambda)
+        self.setOperation(operator)
+
+    def U3(self, theta, phi, _lambda):
+        self.addOp("U3", self.qubitsToList([self.__id, theta, phi, _lambda]))
+        operator = super().U3(self.__id, theta, phi, _lambda)
         self.setOperation(operator)
 
     def U2(self, phi, _lambda):
@@ -265,9 +270,9 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().U2(self.__id, phi, _lambda)
         self.setOperation(operator)
 
-    def U3(self, theta, phi, _lambda):
-        self.addOp("U3", self.qubitsToList([self.__id, theta, phi, _lambda]))
-        operator = super().U2(self.__id, theta, phi, _lambda)
+    def U1(self, _lambda):
+        self.addOp("U1", self.qubitsToList([self.__id, _lambda]))
+        operator = super().U1(self.__id, _lambda)
         self.setOperation(operator)
 
     def RX(self, theta):
@@ -303,9 +308,14 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().CZ(control, self.__id)
         self.setOperation(operator)
 
-    def CU1(self, control, _lambda):
-        self.addOp("CU1", self.qubitsToList([control, self.__id, _lambda]))
-        operator = super().CU1(control, self.__id, _lambda)
+    def CU(self, control, theta, phi, _lambda):
+        self.addOp("CU", self.qubitsToList([control, self.__id, theta, phi, _lambda]))
+        operator = super().CU(control, self.__id, theta, phi, _lambda)
+        self.setOperation(operator)
+
+    def CU3(self, control, theta, phi, _lambda):
+        self.addOp("CU3", self.qubitsToList([control, self.__id, theta, phi, _lambda]))
+        operator = super().CU3(control, self.__id, theta, phi, _lambda)
         self.setOperation(operator)
 
     def CU2(self, control, phi, _lambda):
@@ -313,9 +323,9 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().CU2(control, self.__id, phi, _lambda)
         self.setOperation(operator)
 
-    def CU3(self, control, theta, phi, _lambda):
-        self.addOp("CU3", self.qubitsToList([control, self.__id, theta, phi, _lambda]))
-        operator = super().CU3(control, self.__id, theta, phi, _lambda)
+    def CU1(self, control, _lambda):
+        self.addOp("CU1", self.qubitsToList([control, self.__id, _lambda]))
+        operator = super().CU1(control, self.__id, _lambda)
         self.setOperation(operator)
 
     def CCX(self, control1, control2):

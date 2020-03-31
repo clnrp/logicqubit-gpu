@@ -5,8 +5,8 @@
 # e-mail: cleonerp@gmail.com
 # Apache License
 
-import sympy as sp
-from sympy.physics.quantum import TensorProduct
+from logicqubit.utils import *
+
 from IPython.display import display, Math, Latex
 
 # Zhegalkin polynomial
@@ -23,20 +23,6 @@ class Zhegalkin_Poly:
         self.plist = []
         self.simplified_elist = []
         self.simplified_plist = []
-
-    def BinList(self, n):
-        blist = []
-        for i in iter(range(2 ** n)):
-            b = bin(i)[2:].zfill(n)  # value in binary, ex: i=1, n=4 -> '0001'
-            blist.append(b)
-        return self.Text2List(blist)
-
-    def Text2List(self, table):
-        list = [int(i, base=2) for i in table]
-        size = len(table[0])
-        tmp = sorted(list, key=int, reverse=False)  # values in ascending order
-        result = [[int(bin(j)[2:].zfill(size)[i]) for i in range(size)] for j in tmp]
-        return result
 
     def kronProduct(self, list): # produto de Kronecker
         A = list[0]
@@ -57,7 +43,7 @@ class Zhegalkin_Poly:
         for i in range(len(self.truth_table)):
             self.elist.append([])
             self.plist.append([])
-            for value in self.Text2List(self.truth_table[i]):
+            for value in Utils.Text2List(self.truth_table[i]):
                 t_elist = []
                 t_plist = []
                 for j in value:
@@ -77,7 +63,7 @@ class Zhegalkin_Poly:
         poly = []
         x = ["x_"+str(i+1) for i in range(len(self.truth_table[0][0]))]
         size_p = len(x)
-        binlist = self.BinList(len(x))
+        binlist = Utils.BinList(len(x))
         for p in self.simplified_plist:
             terms = ''
             for i in range(2**size_p):  # todos estados possíveis

@@ -37,3 +37,19 @@ class Utils:
             tex += ' \\\\ '+"{:g}".format(value.item()).replace("+0j","")
         tex += " \\end{pmatrix}"
         return tex
+
+    @staticmethod
+    def BinList(n):
+        blist = []
+        for i in iter(range(2 ** n)):
+            b = bin(i)[2:].zfill(n)  # value in binary, ex: i=1, n=4 -> '0001'
+            blist.append(b)
+        return Utils.Text2List(blist)
+
+    @staticmethod
+    def Text2List(table):
+        list = [int(i, base=2) for i in table]
+        size = len(table[0])
+        tmp = sorted(list, key=int, reverse=False)  # values in ascending order
+        result = [[int(bin(j)[2:].zfill(size)[i]) for i in range(size)] for j in tmp]
+        return result
