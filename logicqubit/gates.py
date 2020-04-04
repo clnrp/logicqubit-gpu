@@ -78,8 +78,14 @@ class Gates(Hilbert):
         operator = self.kronProduct(list)
         return operator
 
-    def U(self, target, theta, phi, _lambda):
-        M = self.Matrix([[exp(-1j*(phi+_lambda)/2)*cos(theta/2), -exp(-1j*(phi-_lambda)/2)*sin(theta/2)],
+    def U(self, target, *argv):  # U or theta, phi and _lambda
+        if(len(argv)==1):
+            M = self.Matrix(argv[0][0])
+        else:
+            theta = argv[0]
+            phi = argv[1]
+            _lambda = argv[2]
+            M = self.Matrix([[exp(-1j*(phi+_lambda)/2)*cos(theta/2), -exp(-1j*(phi-_lambda)/2)*sin(theta/2)],
                         [exp(-1j*(phi-_lambda)/2)*sin(theta/2), exp(1j*(phi+_lambda))*cos(theta/2)]])
         list = self.getOrdListSimpleGate(target, M)
         operator = self.kronProduct(list)
@@ -145,8 +151,14 @@ class Gates(Hilbert):
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator
 
-    def CU(self, control, target, theta, phi, _lambda):
-        M = self.Matrix([[exp(-1j*(phi+_lambda)/2)*cos(theta/2), -exp(-1j*(phi-_lambda)/2)*sin(theta/2)],
+    def CU(self, control, target, *argv):  # U or theta, phi and _lambda
+        if(len(argv)==1):
+            M = self.Matrix(argv[0][0])
+        else:
+            theta = argv[0]
+            phi = argv[1]
+            _lambda = argv[2]
+            M = self.Matrix([[exp(-1j*(phi+_lambda)/2)*cos(theta/2), -exp(-1j*(phi-_lambda)/2)*sin(theta/2)],
                         [exp(1j*(phi-_lambda)/2)*sin(theta/2), exp(1j*(phi+_lambda))*cos(theta/2)]])
         list1,list2 = self.getOrdListCtrlGate(control, target, M)
         operator = self.kronProduct(list1) + self.kronProduct(list2)

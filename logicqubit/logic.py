@@ -66,9 +66,9 @@ class LogicQuBit(Qubits, Gates, Circuit):
         operator = super().H(target)
         self.setOperation(operator)
 
-    def U(self, target, theta, phi, _lambda):
-        self.addOp("U", self.qubitsToList([target, theta, phi, _lambda]))
-        operator = super().U(target, theta, phi, _lambda)
+    def U(self, target, *argv):
+        self.addOp("U", self.qubitsToList([target, argv]))
+        operator = super().U(target, argv)
         self.setOperation(operator)
 
     def U3(self, target, theta, phi, _lambda):
@@ -119,9 +119,9 @@ class LogicQuBit(Qubits, Gates, Circuit):
         operator = super().CZ(control, target)
         self.setOperation(operator)
 
-    def CU(self, control, target, theta, phi, _lambda):
-        self.addOp("CU", self.qubitsToList([control, target, theta, phi, _lambda]))
-        operator = super().CU(control, target, theta, phi, _lambda)
+    def CU(self, control, target, *argv):
+        self.addOp("CU", self.qubitsToList([control, target]))
+        operator = super().CU(control, target, argv)
         self.setOperation(operator)
 
     def CU3(self, control, target, theta, phi, _lambda):
