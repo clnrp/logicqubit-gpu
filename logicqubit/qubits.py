@@ -308,6 +308,21 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().CZ(control, self.__id)
         self.setOperation(operator)
 
+    def CRX(self, control, theta):
+        self.addOp("CRX", self.qubitsToList([control, self.__id, theta]))
+        operator = super().CRX(control, self.__id, theta)
+        self.setOperation(operator)
+
+    def CRY(self, control, theta):
+        self.addOp("CRY", self.qubitsToList([control, self.__id, theta]))
+        operator = super().CRY(control, self.__id, theta)
+        self.setOperation(operator)
+
+    def CRZ(self, control, phi):
+        self.addOp("CRZ", self.qubitsToList([control, self.__id, phi]))
+        operator = super().CRZ(control, self.__id, phi)
+        self.setOperation(operator)
+
     def CU(self, control, *argv):
         self.addOp("CU", self.qubitsToList([control, self.__id]))
         operator = super().CU(control, self.__id, argv)

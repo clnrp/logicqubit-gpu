@@ -119,6 +119,21 @@ class LogicQuBit(Qubits, Gates, Circuit):
         operator = super().CZ(control, target)
         self.setOperation(operator)
 
+    def CRX(self, control, target, theta):
+        self.addOp("CRX", self.qubitsToList([control, target, theta]))
+        operator = super().CRX(control, target, theta)
+        self.setOperation(operator)
+
+    def CRY(self, control, target, theta):
+        self.addOp("CRY", self.qubitsToList([control, target, theta]))
+        operator = super().CRY(control, target, theta)
+        self.setOperation(operator)
+
+    def CRZ(self, control, target, phi):
+        self.addOp("CRZ", self.qubitsToList([control, target, phi]))
+        operator = super().CRZ(control, target, phi)
+        self.setOperation(operator)
+
     def CU(self, control, target, *argv):
         self.addOp("CU", self.qubitsToList([control, target]))
         operator = super().CU(control, target, argv)
@@ -187,8 +202,7 @@ class LogicQuBit(Qubits, Gates, Circuit):
             P1 = self.kronProduct(list)
             measure_0 = (density_m*P0).trace()
             measure_1 = (density_m*P1).trace()
-            self.setMeasuredQubits(target)
-            self.setMeasuredValues([measure_0, measure_1])
+            #self.setMeasuredQubits(target)
             return [measure_0, measure_1]
 
     def Measure2(self, target):

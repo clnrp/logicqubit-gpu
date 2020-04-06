@@ -55,7 +55,7 @@ class Gates(Hilbert):
         return operator
 
     def V(self, target):
-        M = (1j+1)/2*self.Matrix([[1, -1j], [-1j, 1]]) # sqrt(X) ou sqrt(NOT)
+        M = (1j+1)/2*self.Matrix([[1, -1j], [-1j, 1]])  # sqrt(X) ou sqrt(NOT)
         list = self.getOrdListSimpleGate(target, M)
         operator = self.kronProduct(list)
         return operator
@@ -67,7 +67,7 @@ class Gates(Hilbert):
         return operator
 
     def T(self, target):
-        M = self.Matrix([[1, 0], [0, (1+1j)/sqrt(2)]]) # sqrt(S)
+        M = self.Matrix([[1, 0], [0, (1+1j)/sqrt(2)]])  # sqrt(S)
         list = self.getOrdListSimpleGate(target, M)
         operator = self.kronProduct(list)
         return operator
@@ -151,6 +151,26 @@ class Gates(Hilbert):
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator
 
+    def CRX(self, control, target, theta):
+        M = self.Matrix([[cos(theta/2), -1j*sin(theta/2)],
+                    [-1j*sin(theta/2), cos(theta/2)]])
+        list1,list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
+    def CRY(self, control, target, theta):
+        M = self.Matrix([[cos(theta/2), -sin(theta/2)],
+                    [sin(theta/2), cos(theta/2)]])
+        list1, list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
+    def CRZ(self, control, target, phi):
+        M = self.Matrix([[exp(-1j * phi / 2), 0], [0, exp(1j * phi / 2)]])
+        list1, list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
     def CU(self, control, target, *argv):  # U or theta, phi and _lambda
         if(len(argv)==1):
             M = self.Matrix(argv[0][0])
@@ -188,6 +208,12 @@ class Gates(Hilbert):
         list1,list2 = self.getOrdListCtrl2Gate(control1, control2, target, Gate)
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator
+
+    def Fredkin(self, control, target1, target2):
+        #Gate = self.Matrix([[0, 1], [1, 0]])-self.ID()
+        #list1,list2 = self.getOrdListCtrl2Gate(control1, control2, target, Gate)
+        #operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return None
 
     def SWAP(self):
         M = self.Matrix([[1, 0, 0, 0], [0, 0, 1, 0],
