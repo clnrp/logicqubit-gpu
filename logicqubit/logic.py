@@ -262,21 +262,17 @@ class LogicQuBit(Qubits, Gates, Circuit):
     def PlotDensityMatrix(self, imaginary=False, decimal=False):
         size_p = self.__qubits_number  # número de qubits
         mRho = [[0]*2**size_p for i in range(2**size_p)]
-        values = Utils.BinList(size_p)
         rho = self.DensityMatrix()
-        for id1, value1 in enumerate(values):
-            for id2, value2 in enumerate(values):
-                phi1 = self.kronProduct([self.ket(i) for i in value1])
-                phi2 = self.kronProduct([self.ket(i) for i in value2])
+        for id1 in range(2**size_p):
+            for id2 in range(2**size_p):
                 if (self.__cuda):
-                    value = cp.dot(cp.dot(phi1.transpose().conj(), rho), phi2)
+                    value = rho[id1][id2]
                     if(not imaginary):
                         value = value.item().real
                     else:
                         value = value.item().imag
                 else:
-                    value = phi1.transpose().conjugate()*rho*phi2
-                    value = value[0]
+                    value = rho[id1,id2]
                     if(not imaginary):
                         value = sp.re(value)
                     else:
