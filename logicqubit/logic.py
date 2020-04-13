@@ -6,9 +6,13 @@
 # Apache License
 
 import sympy as sp
+import numpy as np
 from sympy.physics.quantum import TensorProduct
 from cmath import *
+
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 from logicqubit.qubits import *
 from logicqubit.gates import *
@@ -192,6 +196,11 @@ class LogicQuBit(Qubits, Gates, Circuit):
         density_m = self.getPsi() * self.getPsiAdjoint()
         return density_m
 
+    def Pure(self):
+        density_m = self.DensityMatrix()
+        pure = (density_m*density_m).trace()
+        return pure
+
     def Measure_One(self, target):
         if(not self.isMeasured(target)):
             self.addOp("Measure", self.qubitsToList([target]))
@@ -204,46 +213,6 @@ class LogicQuBit(Qubits, Gates, Circuit):
             measure_1 = (density_m*P1).trace()
             #self.setMeasuredQubits(target)
             return [measure_0, measure_1]
-
-    def Measure2(self, target):
-        target = self.qubitsToList(target)
-        self.setMeasuredQubits(target)
-        target.sort()
-        self.addOp("Measure", target)
-        density_m = self.DensityMatrix()
-        size_p = len(target)  # número de qubits a ser medidos
-        size = 2 ** size_p  # número de estados possíveis
-        result = []
-        for i in range(size):
-            tlist = [self.ID() for tl in range(self.__qubits_number)]
-            blist = [i >> bl & 0x1 for bl in range(size_p)]  # bit list, bits de cada i
-            cnt = 0
-            if (self.__first_left):
-                sing = 1
-                offset_list = 0
-                offset_cnt = 0
-                plist = range(self.__qubits_number)
-            else:
-                sing = -1
-                offset_list = self.__qubits_number-1
-                offset_cnt = len(target)-1
-                plist = reversed(range(self.__qubits_number))
-            for j in plist:
-                if j + 1 == target[offset_cnt+sing*cnt]:
-                    if blist[size_p-1-cnt] == 0:  # mais significativo primeiro
-                        tlist[offset_list+sing*j] = super().P0()
-                    else:
-                        tlist[offset_list+sing*j] = super().P1()
-                    cnt += 1
-                    if (cnt >= size_p):
-                        break
-            M = self.kronProduct(tlist)
-            measure = (density_m * M).trace()  # valor esperado
-            if(self.__cuda):
-                measure = measure.item().real
-            result.append(measure)
-        self.setMeasuredValues(result)
-        return result
 
     def Measure(self, target, fisrt_msb = False):  # ex: medir 3 qubits de 5: 2,1,4 do estado "010" -> M010 = |1><1| x |0><0| x 1 x |0><0| x 1
         target = self.qubitsToList(target)
@@ -290,7 +259,59 @@ class LogicQuBit(Qubits, Gates, Circuit):
         else:
             print("No qubit measured!")
 
-    def Pure(self):
-        density_m = self.DensityMatrix()
-        pure = (density_m*density_m).trace()
-        return pure
+    def PlotDensityMatrix(self, imaginary=False, decimal=False):
+        size_p = self.__qubits_number  # número de qubits
+        mRho = [[0]*2**size_p for i in range(2**size_p)]
+        values = Utils.BinList(size_p)
+        rho = self.DensityMatrix()
+        for id1, value1 in enumerate(values):
+            for id2, value2 in enumerate(values):
+                phi1 = self.kronProduct([self.ket(i) for i in value1])
+                phi2 = self.kronProduct([self.ket(i) for i in value2])
+                if (self.__cuda):
+                    value = cp.dot(cp.dot(phi1.transpose().conj(), rho), phi2)
+                    if(not imaginary):
+                        value = value.item().real
+                    else:
+                        value = value.item().imag
+                else:
+                    value = phi1.transpose().conjugate()*rho*phi2
+                    value = value[0]
+                    if(not imaginary):
+                        value = sp.re(value)
+                    else:
+                        value = sp.im(value)
+                mRho[id1][id2] = value
+
+        result = np.array(mRho, dtype=np.float)
+        fig = plt.figure(figsize=(5, 5), dpi=150)
+        ax1 = fig.add_subplot(111, projection='3d')
+
+        size = 2 ** size_p
+        if(not decimal):
+            labels = ["|" + "{0:b}".format(i).zfill(size_p) + ">" for i in range(size)]
+        else:
+            labels = [i for i in range(size)]
+        xlabels = np.array(labels)
+        xpos = np.arange(xlabels.shape[0])
+        ylabels = np.array(labels)
+        ypos = np.arange(ylabels.shape[0])
+
+        xpos_mesh, ypos_mesh = np.meshgrid(xpos, ypos, copy=False)
+
+        zpos = result
+        zpos = zpos.ravel()
+
+        dx = 0.5
+        dy = 0.5
+        dz = zpos
+
+        ax1.w_xaxis.set_ticks(xpos + dx / 2.)
+        ax1.w_xaxis.set_ticklabels(xlabels)
+        ax1.w_yaxis.set_ticks(ypos + dy / 2.)
+        ax1.w_yaxis.set_ticklabels(ylabels)
+
+        values = np.linspace(0.2, 1., xpos_mesh.ravel().shape[0])
+        colors = cm.rainbow(values)
+        ax1.bar3d(xpos_mesh.ravel(), ypos_mesh.ravel(), dz * 0, dx, dy, dz, color=colors)
+        plt.show()

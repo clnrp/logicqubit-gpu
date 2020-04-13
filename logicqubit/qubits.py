@@ -240,9 +240,9 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().V(self.__id)
         self.setOperation(operator)
 
-    def S(self, target):
+    def S(self, target, adjoint = False):
         self.addOp("S", [self.__id])
-        operator = super().S(self.__id)
+        operator = super().S(self.__id, adjoint)
         self.setOperation(operator)
 
     def T(self, target):
@@ -308,6 +308,21 @@ class Qubit(Qubits, Gates, Circuit):
         operator = super().CZ(control, self.__id)
         self.setOperation(operator)
 
+    def CV(self, control, adjoint = False):
+        self.addOp("CV", self.qubitsToList([control, self.__id]))
+        operator = super().CV(control, self.__id, adjoint)
+        self.setOperation(operator)
+
+    def CS(self, control, adjoint = False):
+        self.addOp("CS", self.qubitsToList([control, self.__id]))
+        operator = super().CS(control, self.__id, adjoint)
+        self.setOperation(operator)
+
+    def CT(self, control, adjoint = False):
+        self.addOp("CT", self.qubitsToList([control, self.__id]))
+        operator = super().CT(control, self.__id, adjoint)
+        self.setOperation(operator)
+
     def CRX(self, control, theta):
         self.addOp("CRX", self.qubitsToList([control, self.__id, theta]))
         operator = super().CRX(control, self.__id, theta)
@@ -350,6 +365,12 @@ class Qubit(Qubits, Gates, Circuit):
 
     def Toffoli(self, control1, control2):
         self.CCX(control1, control2)
+
+    def Controlled(self, name, control, target, adjoint = False):
+        self.addOp(name, self.qubitsToList([control, self.__id]))
+        functions = {'X': super().CX, 'Y': super().CY, 'Z': super().CZ}
+        operator = functions[name](control[0], control[1], self.__id)
+        self.setOperation(operator)
 
 class QubitRegister(Qubit):
     def __init__(self, number = 3):

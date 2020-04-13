@@ -17,11 +17,13 @@ class Gates(Hilbert):
         Gates.__qubits_number = qubits_number
         Gates.__first_left = first_left
 
-    def Matrix(self, input):
+    def Matrix(self, input, adjoint = False):
         if(self.getCuda()):
             M = cp.array(input)
         else:
             M = sp.Matrix(input)
+        if(adjoint):
+            M = M.transpose().conjugate()
         return M
 
     def ID(self):
@@ -34,6 +36,14 @@ class Gates(Hilbert):
 
     def P1(self):
         M = self.Matrix([[0, 0], [0, 1]])  # |1><1|
+        return M
+
+    def L0(self):
+        M = self.Matrix([[0, 1], [0, 0]])  # |0><1|
+        return M
+
+    def L1(self):
+        M = self.Matrix([[0, 0], [1, 0]])  # |1><0|
         return M
 
     def X(self, target):
@@ -60,8 +70,8 @@ class Gates(Hilbert):
         operator = self.kronProduct(list)
         return operator
 
-    def S(self, target):
-        M = self.Matrix([[1, 0], [0, 1j]])  # sqrt(Z)
+    def S(self, target, adjoint = False):
+        M = self.Matrix([[1, 0], [0, 1j]], adjoint)  # sqrt(Z)
         list = self.getOrdListSimpleGate(target, M)
         operator = self.kronProduct(list)
         return operator
@@ -131,7 +141,7 @@ class Gates(Hilbert):
         return operator
 
     def CX(self, control, target):
-        M = self.Matrix([[0, 1], [1, 0]]) # X
+        M = self.Matrix([[0, 1], [1, 0]])  # X
         list1,list2 = self.getOrdListCtrlGate(control, target, M)
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator
@@ -147,6 +157,24 @@ class Gates(Hilbert):
 
     def CZ(self, control, target):
         M = self.Matrix([[1, 0], [0, -1]])
+        list1, list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
+    def CV(self, control, target, adjoint = False):
+        M = (1j+1)/2*self.Matrix([[1, -1j], [-1j, 1]], adjoint)  # sqrt(X) ou sqrt(NOT)
+        list1, list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
+    def CS(self, control, target, adjoint = False):
+        M = self.Matrix([[1, 0], [0, 1j]], adjoint)  # sqrt(Z)
+        list1, list2 = self.getOrdListCtrlGate(control, target, M)
+        operator = self.kronProduct(list1) + self.kronProduct(list2)
+        return operator
+
+    def CT(self, control, target, adjoint = False):
+        M = self.Matrix([[1, 0], [0, (1+1j)/sqrt(2)]], adjoint)  # sqrt(S)
         list1, list2 = self.getOrdListCtrlGate(control, target, M)
         operator = self.kronProduct(list1) + self.kronProduct(list2)
         return operator

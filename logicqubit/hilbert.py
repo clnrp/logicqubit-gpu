@@ -40,6 +40,13 @@ class Hilbert():
             result = sp.Matrix([Utils.onehot(i, value) for i in range(d)])
         return result
 
+    def getAdjoint(self, psi):
+        if(Hilbert.__cuda):
+            result = psi.transpose().conj()
+        else:
+            result = psi.adjoint()
+        return result
+
     def product(self, Operator, psi):
         if(Hilbert.__cuda):
             result = cp.dot(Operator, psi)

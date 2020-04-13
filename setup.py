@@ -42,6 +42,6 @@ setup(
     ],
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['sympy','cupy'],
+    install_requires=['sympy','numpy','cupy'],
 
 )
