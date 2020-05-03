@@ -107,6 +107,17 @@ class Qubits(Hilbert):
     def getPsi(self):
         return Qubits.__psi
 
+    def getDictPsi(self):
+        size_p = self.__q_number
+        size = 2 ** size_p
+        labels = ["{0:b}".format(i).zfill(size_p) for i in range(size)]
+        if (self.__symbolic):
+            value_l = [Utils.textSymbolfix(str(value), self.__q_number, Qubits.first_left) for value in Qubits.__psi]
+            dictPsi = {label: value_l[i] for i, label in enumerate(labels)}
+        else:
+            dictPsi = {label: Qubits.__psi[i].item() for i, label in enumerate(labels)}
+        return dictPsi
+
     def getPsiAtAngles(self, degree = False):
         angles = []
         if (not Qubits.__symbolic):

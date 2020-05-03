@@ -20,10 +20,12 @@ class Gates(Hilbert):
     def Matrix(self, input, adjoint = False):
         if(self.getCuda()):
             M = cp.array(input)
+            if(adjoint):
+                M = M.transpose().conj()
         else:
             M = sp.Matrix(input)
-        if(adjoint):
-            M = M.transpose().conjugate()
+            if(adjoint):
+                M = M.transpose().conjugate()
         return M
 
     def ID(self):

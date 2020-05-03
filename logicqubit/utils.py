@@ -21,14 +21,20 @@ class Utils:
     @staticmethod
     def texfix(value, number, left=False):
         tex = sp.latex(value).replace(' \cdot ', '')
+        tex = Utils.textSymbolfix(tex, number, left)
+        return tex
+
+    @staticmethod
+    def textSymbolfix(value, number, left=False):
+        text = value
         for i in range(1, number+1):
             if(left):
-                tex = tex.replace(str(i) + 'a', 'a')
-                tex = tex.replace(str(i) + 'b', 'b')
+                text = text.replace(str(i) + 'a', 'a')
+                text = text.replace(str(i) + 'b', 'b')
             else:
-                tex = tex.replace(str(number+1-i) + 'a', 'a')
-                tex = tex.replace(str(number+1-i) + 'b', 'b')
-        return tex
+                text = text.replace(str(number+1-i) + 'a', 'a')
+                text = text.replace(str(number+1-i) + 'b', 'b')
+        return text
 
     @staticmethod
     def vec2tex(vector):
