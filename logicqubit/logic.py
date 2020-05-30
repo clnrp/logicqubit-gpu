@@ -225,9 +225,9 @@ class LogicQuBit(Qubits, Gates, Circuit):
         measure_1 = (density_m*P1).trace()
         value = self.get_shot([measure_0, measure_1], shots)
         if(value[0] == 0):
-            new_state = P0*self.getPsi()/sqrt(measure_0)
+            new_state = self.product(P0, self.getPsi())/sqrt(measure_0)
         else:
-            new_state = P1*self.getPsi()/sqrt(measure_1)
+            new_state = self.product(P1, self.getPsi())/sqrt(measure_1)
         self.setPsi(new_state)
         return value
 
