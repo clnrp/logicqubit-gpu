@@ -99,7 +99,7 @@ class Qubits(Hilbert):
         return Qubits.__symbolic == True
 
     def setPsi(self, psi):
-        if (not Qubits.__symbolic):
+        if (Qubits.__symbolic):
             Qubits.__psi = sp.Matrix(psi)
         else:
             Qubits.__psi = cp.array(psi)

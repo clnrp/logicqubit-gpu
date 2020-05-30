@@ -9,6 +9,7 @@ import sympy as sp
 import numpy as np
 from sympy.physics.quantum import TensorProduct
 from cmath import *
+import random
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -201,18 +202,34 @@ class LogicQuBit(Qubits, Gates, Circuit):
         pure = (density_m*density_m).trace()
         return pure
 
-    def Measure_One(self, target):
-        if(not self.isMeasured(target)):
-            self.addOp("Measure", self.qubitsToList([target]))
-            density_m = self.DensityMatrix()
-            list = self.getOrdListSimpleGate(target, super().P0())
-            P0 = self.kronProduct(list)
-            list = self.getOrdListSimpleGate(target, super().P1())
-            P1 = self.kronProduct(list)
-            measure_0 = (density_m*P0).trace()
-            measure_1 = (density_m*P1).trace()
-            #self.setMeasuredQubits(target)
-            return [measure_0, measure_1]
+    def get_shot(self, measured, shots):
+        max_set = shots*100
+        if(self.__symbolic):
+            list_all = [int(value * max_set) * [i] for i, value in enumerate(measured)]
+        else:
+            list_all = [int(value.real * max_set) * [i] for i, value in enumerate(measured)]
+        list_all_values = []
+        for list_values in list_all:
+            list_all_values += list_values
+        values = [random.choice(list_all_values) for i in range(shots)]
+        return values
+
+    def Measure_One(self, target, shots=1):
+        self.addOp("Measure", self.qubitsToList([target]))
+        density_m = self.DensityMatrix()
+        list = self.getOrdListSimpleGate(target, super().P0())
+        P0 = self.kronProduct(list)
+        list = self.getOrdListSimpleGate(target, super().P1())
+        P1 = self.kronProduct(list)
+        measure_0 = (density_m*P0).trace()
+        measure_1 = (density_m*P1).trace()
+        value = self.get_shot([measure_0, measure_1], shots)
+        if(value[0] == 0):
+            new_state = P0*self.getPsi()/sqrt(measure_0)
+        else:
+            new_state = P1*self.getPsi()/sqrt(measure_1)
+        self.setPsi(new_state)
+        return value
 
     def Measure(self, target, fisrt_msb = False):  # ex: medir 3 qubits de 5: 2,1,4 do estado "010" -> M010 = |1><1| x |0><0| x 1 x |0><0| x 1
         target = self.qubitsToList(target)
