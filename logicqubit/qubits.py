@@ -19,7 +19,7 @@ class Qubits(Hilbert):
     def __init__(self, qubits_number, symbolic, first_left):
         Qubits.__q_number = qubits_number
         Qubits.__symbolic = symbolic
-        Qubits.first_left = first_left
+        Qubits.__first_left = first_left
         Qubits.__number = 0
         Qubits.__used_qubits = []
         Qubits.__measured_qubits = []
@@ -27,13 +27,13 @@ class Qubits(Hilbert):
         if(not Qubits.__symbolic):
             Qubits.__psi = self.kronProduct([self.ket(0) for i in range(Qubits.__q_number)])
         else:
-            if(Qubits.first_left):  # o qubit 1 é o primeiro a esquerda
+            if(Qubits.__first_left):  # o qubit 1 é o primeiro a esquerda
                 a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Qubits.__q_number + 1)])
                 b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Qubits.__q_number + 1)])
             else:
                 a = sp.symbols([str(Qubits.__q_number+1-i) + "a" + str(i) + "_0" for i in reversed(range(1, Qubits.__q_number + 1))])
                 b = sp.symbols([str(Qubits.__q_number+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, Qubits.__q_number + 1))])
-            Qubits.__psi = self.kronProduct([a[i]*self.ket(0)+b[i]*self.ket(1) for i in range(Qubits.__q_number)])
+            Qubits.__psi = self.kronProduct([self.ket(0)*a[i]+self.ket(1)*b[i] for i in range(Qubits.__q_number)])
 
     def addQubit(self, id=None):
         if(len(Qubits.__used_qubits) < Qubits.__q_number):
@@ -64,6 +64,12 @@ class Qubits(Hilbert):
 
     def getQubitsNumber(self):
         return Qubits.__q_number
+
+    def setFirstLeft(self, value):
+        Qubits.__first_left = value
+
+    def isFirstLeft(self):
+        return Qubits.__first_left
 
     def getUsedQubits(self):
         return len(Qubits.__used_qubits)
@@ -99,10 +105,7 @@ class Qubits(Hilbert):
         return Qubits.__symbolic == True
 
     def setPsi(self, psi):
-        if (Qubits.__symbolic):
-            Qubits.__psi = sp.Matrix(psi)
-        else:
-            Qubits.__psi = cp.array(psi)
+        Qubits.__psi = psi
 
     def getPsi(self):
         return Qubits.__psi
@@ -127,10 +130,7 @@ class Qubits(Hilbert):
         return angles
 
     def getPsiAdjoint(self):
-        if(self.getCuda()):
-            result = Qubits.__psi.transpose().conj()
-        else:
-            result = Qubits.__psi.adjoint()
+        result = Qubits.__psi.adjoint()
         return result
 
     def setOperation(self, operator):
@@ -150,15 +150,15 @@ class Qubits(Hilbert):
         if(Qubits.__symbolic):
             for i in range(1, Qubits.__q_number+1):
                 if (Qubits.first_left):
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_1", b), False)
                 else:
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b), False)
         else:
             print("This session is not symbolic!")
 
@@ -166,16 +166,16 @@ class Qubits(Hilbert):
         if(Qubits.__symbolic):
             list_id = self.qubitsToList(id)
             for i in list_id:
-                if (Qubits.first_left):
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_0", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"a"+str(i)+"_1", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_0", b)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+"b"+str(i)+"_1", b)
+                if (Qubits.__first_left):
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_1", b), False)
                 else:
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b), False)
         else:
             print("This session is not symbolic!")
 
@@ -183,7 +183,7 @@ class Qubits(Hilbert):
         if(Qubits.__symbolic):
             list_id = self.qubitsToList(id)
             for i in list_id:
-                if (Qubits.first_left):
+                if (Qubits.__first_left):
                     Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_0", value)
                     Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_1", value)
                 else:
@@ -194,9 +194,9 @@ class Qubits(Hilbert):
 
     def PrintState(self, simple = False):
         if(not self.__symbolic):
-            value = Utils.vec2tex(Qubits.__psi)
+            value = Utils.vec2tex(Qubits.__psi.get())
         else:
-            value = Utils.texfix(Qubits.__psi, self.__q_number, Qubits.first_left)
+            value = Utils.texfix(Qubits.__psi.get(), self.__q_number, Qubits.__first_left)
 
         if(not simple):
             display(Math(value))
@@ -205,16 +205,18 @@ class Qubits(Hilbert):
 
     def PrintLastOperator(self, tex = True):
         if(tex):
-            value = sp.latex(Qubits.__last_operator)
+            value = sp.latex(Qubits.__last_operator.get())
             display(Math(value))
         else:
-            print(Qubits.__last_operator)
+            print(Qubits.__last_operator.get())
 
 
 class Qubit(Qubits, Gates, Circuit):
     def __init__(self, id = None):
         self.__id = self.addQubit(id)
         self.__name = "q"+str(self.__id)
+        self.setFirstLeft(self.isFirstLeft())
+        Gates.__init__(self, self.getQubitsNumber())
 
     def __eq__(self, other):
         return self.__id == other

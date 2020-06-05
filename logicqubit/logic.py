@@ -33,7 +33,8 @@ class LogicQuBit(Qubits, Gates, Circuit):
             self.__cuda = False
         super().setCuda(self.__cuda)
         super().__init__(qubits_number, self.__symbolic, self.__first_left)
-        Gates.__init__(self, qubits_number, self.__first_left)
+        self.setFirstLeft(self.__first_left)
+        Gates.__init__(self, qubits_number)
         Circuit.__init__(self)
 
     def X(self, target):
@@ -221,8 +222,8 @@ class LogicQuBit(Qubits, Gates, Circuit):
         P0 = self.kronProduct(list)
         list = self.getOrdListSimpleGate(target, super().P1())
         P1 = self.kronProduct(list)
-        measure_0 = (density_m*P0).trace()
-        measure_1 = (density_m*P1).trace()
+        measure_0 = (density_m*P0).trace().get()
+        measure_1 = (density_m*P1).trace().get()
         value = self.get_shot([measure_0, measure_1], shots)
         if(value[0] == 0):
             new_state = self.product(P0, self.getPsi())/sqrt(measure_0)
@@ -252,9 +253,10 @@ class LogicQuBit(Qubits, Gates, Circuit):
             if (not self.__first_left):
                 tlist.reverse()
             M = self.kronProduct(tlist)
-            measure = (density_m * M).trace()  # valor esperado
+            m1=(density_m * M)
+            measure = (density_m * M).trace().get()  # valor esperado
             if(self.__cuda):
-                measure = measure.item().real
+                measure = measure.get().item().real
             result.append(measure)
         self.setMeasuredValues(result)
         return result
@@ -279,7 +281,7 @@ class LogicQuBit(Qubits, Gates, Circuit):
     def PlotDensityMatrix(self, imaginary=False, decimal=False):
         size_p = self.__qubits_number  # número de qubits
         mRho = [[0]*2**size_p for i in range(2**size_p)]
-        rho = self.DensityMatrix()
+        rho = self.DensityMatrix().get()
         for id1 in range(2**size_p):
             for id2 in range(2**size_p):
                 if (self.__cuda):
