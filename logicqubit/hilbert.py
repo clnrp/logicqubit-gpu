@@ -80,6 +80,10 @@ class Matrix:
             result = self.__matrix * other
         return Matrix(result, self.__cuda)
 
+    def __truediv__(self, other):
+        result = self.__matrix * (1./other)
+        return Matrix(result, self.__cuda)
+
     def __eq__(self, other):
         return self.__matrix == other.get()
 
