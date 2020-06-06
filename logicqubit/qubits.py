@@ -115,16 +115,16 @@ class Qubits(Hilbert):
         size = 2 ** size_p
         labels = ["{0:b}".format(i).zfill(size_p) for i in range(size)]
         if (self.__symbolic):
-            value_l = [Utils.textSymbolfix(str(value), self.__q_number, Qubits.first_left) for value in Qubits.__psi]
+            value_l = [Utils.textSymbolfix(str(value), self.__q_number, Qubits.first_left) for value in Qubits.__psi.get()]
             dictPsi = {label: value_l[i] for i, label in enumerate(labels)}
         else:
-            dictPsi = {label: Qubits.__psi[i].item() for i, label in enumerate(labels)}
+            dictPsi = {label: Qubits.__psi.get()[i].item() for i, label in enumerate(labels)}
         return dictPsi
 
     def getPsiAtAngles(self, degree = False):
         angles = []
         if (not Qubits.__symbolic):
-            angles = cp.angle(Qubits.__psi)
+            angles = cp.angle(Qubits.__psi.get())
             if(degree):
                 angles = angles*180/pi
         return angles
@@ -184,11 +184,11 @@ class Qubits(Hilbert):
             list_id = self.qubitsToList(id)
             for i in list_id:
                 if (Qubits.__first_left):
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_0", value)
-                    Qubits.__psi = Qubits.__psi.subs(str(i)+symbol+str(i)+"_1", value)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+symbol+str(i)+"_0", value), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+symbol+str(i)+"_1", value), False)
                 else:
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_0", value)
-                    Qubits.__psi = Qubits.__psi.subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_1", value)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_0", value), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_1", value), False)
         else:
             print("This session is not symbolic!")
 
