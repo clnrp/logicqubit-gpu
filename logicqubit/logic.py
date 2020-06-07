@@ -24,17 +24,14 @@ from logicqubit.utils import *
 
 class LogicQuBit(Qubits, Gates, Circuit):
 
-    def __init__(self, qubits_number = 3, **kwargs):
-        self.__cuda = kwargs.get('cuda', True)
-        self.__symbolic = kwargs.get('symbolic', False)
-        self.__first_left = kwargs.get('first_left', True)  # o qubit 1 é o mais a esquerda
-        self.__qubits_number = qubits_number
-        if(self.__symbolic):
-            self.__cuda = False
-        super().setCuda(self.__cuda)
-        super().__init__(qubits_number, self.__symbolic, self.__first_left)
-        self.setFirstLeft(self.__first_left)
-        Gates.__init__(self, qubits_number)
+    def __init__(self, number_of_qubits = 3, **kwargs):
+        symbolic = kwargs.get('symbolic', False)
+        first_left = kwargs.get('first_left', True)  # o qubit 1 é o mais a esquerda
+        super().setCuda(not symbolic)
+        super().setFirstLeft(first_left)
+        super().setNumberOfQubits(number_of_qubits)
+        Qubits.__init__(self)
+        Gates.__init__(self, number_of_qubits)
         Circuit.__init__(self)
 
     def X(self, target):
@@ -205,7 +202,7 @@ class LogicQuBit(Qubits, Gates, Circuit):
 
     def get_shot(self, measured, shots):
         max_set = shots*100
-        if(self.__symbolic):
+        if not self.getCuda():
             list_all = [int(value * max_set) * [i] for i, value in enumerate(measured)]
         else:
             list_all = [int(value.real * max_set) * [i] for i, value in enumerate(measured)]
@@ -243,19 +240,18 @@ class LogicQuBit(Qubits, Gates, Circuit):
         size = 2 ** size_p  # número de estados possíveis
         result = []
         for i in range(size):
-            tlist = [self.ID() for tl in range(self.__qubits_number)]
+            tlist = [self.ID() for tl in range(self.getNumberOfQubits())]
             blist = [i >> bl & 0x1 for bl in range(size_p)]  # bit list, bits de cada i
             for j, value in enumerate(target):
                 if blist[j] == 0:  # mais significativo primeiro
                     tlist[value-1] = super().P0()
                 else:
                     tlist[value-1] = super().P1()
-            if (not self.__first_left):
+            if not self.isFirstLeft():
                 tlist.reverse()
             M = self.kronProduct(tlist)
-            m1=(density_m * M)
-            measure = (density_m * M).trace().get()  # valor esperado
-            if(self.__cuda):
+            measure = (density_m * M).get().trace()  # valor esperado
+            if self.getCuda():
                 measure = measure.get().item().real
             result.append(measure)
         self.setMeasuredValues(result)
@@ -279,12 +275,12 @@ class LogicQuBit(Qubits, Gates, Circuit):
             print("No qubit measured!")
 
     def PlotDensityMatrix(self, imaginary=False, decimal=False):
-        size_p = self.__qubits_number  # número de qubits
+        size_p = self.getNumberOfQubits()  # número de qubits
         mRho = [[0]*2**size_p for i in range(2**size_p)]
         rho = self.DensityMatrix().get()
         for id1 in range(2**size_p):
             for id2 in range(2**size_p):
-                if (self.__cuda):
+                if self.getCuda():
                     value = rho[id1][id2]
                     if(not imaginary):
                         value = value.item().real

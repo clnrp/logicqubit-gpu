@@ -16,27 +16,24 @@ from logicqubit.utils import *
 
 class Qubits(Hilbert):
 
-    def __init__(self, qubits_number, symbolic, first_left):
-        Qubits.__q_number = qubits_number
-        Qubits.__symbolic = symbolic
-        Qubits.__first_left = first_left
+    def __init__(self):
         Qubits.__number = 0
         Qubits.__used_qubits = []
         Qubits.__measured_qubits = []
         Qubits.__measured_values = []
-        if(not Qubits.__symbolic):
-            Qubits.__psi = self.kronProduct([self.ket(0) for i in range(Qubits.__q_number)])
+        if self.getCuda():
+            Qubits.__psi = self.kronProduct([self.ket(0) for i in range(self.getNumberOfQubits())])
         else:
-            if(Qubits.__first_left):  # o qubit 1 é o primeiro a esquerda
-                a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Qubits.__q_number + 1)])
-                b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Qubits.__q_number + 1)])
+            if self.isFirstLeft():  # o qubit 1 é o primeiro a esquerda
+                a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, self.getNumberOfQubits() + 1)])
+                b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, self.getNumberOfQubits() + 1)])
             else:
-                a = sp.symbols([str(Qubits.__q_number+1-i) + "a" + str(i) + "_0" for i in reversed(range(1, Qubits.__q_number + 1))])
-                b = sp.symbols([str(Qubits.__q_number+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, Qubits.__q_number + 1))])
-            Qubits.__psi = self.kronProduct([self.ket(0)*a[i]+self.ket(1)*b[i] for i in range(Qubits.__q_number)])
+                a = sp.symbols([str(self.getNumberOfQubits()+1-i) + "a" + str(i) + "_0" for i in reversed(range(1, self.getNumberOfQubits() + 1))])
+                b = sp.symbols([str(self.getNumberOfQubits()+1-i) + "b" + str(i) + "_1" for i in reversed(range(1, self.getNumberOfQubits() + 1))])
+            Qubits.__psi = self.kronProduct([self.ket(0)*a[i]+self.ket(1)*b[i] for i in range(self.getNumberOfQubits())])
 
     def addQubit(self, id=None):
-        if(len(Qubits.__used_qubits) < Qubits.__q_number):
+        if(len(Qubits.__used_qubits) < self.getNumberOfQubits()):
             if(id != None):
                 if(not id in Qubits.__used_qubits):
                     Qubits.__used_qubits.append(id)
@@ -51,25 +48,19 @@ class Qubits(Hilbert):
             return None
 
     def getLowestIdAvailable(self):
-        all = list(range(1, Qubits.__q_number + 1))
+        all = list(range(1, self.getNumberOfQubits() + 1))
         for i in Qubits.__used_qubits:
             all.remove(i)
         return min(all)
 
     def getBiggestIdAvailable(self):
-        all = list(range(1, Qubits.__q_number + 1))
+        all = list(range(1, self.getNumberOfQubits() + 1))
         for i in Qubits.__used_qubits:
             all.remove(i)
         return max(all)
 
     def getQubitsNumber(self):
-        return Qubits.__q_number
-
-    def setFirstLeft(self, value):
-        Qubits.__first_left = value
-
-    def isFirstLeft(self):
-        return Qubits.__first_left
+        return self.getNumberOfQubits()
 
     def getUsedQubits(self):
         return len(Qubits.__used_qubits)
@@ -101,9 +92,6 @@ class Qubits(Hilbert):
     def getMeasuredValues(self):
         return Qubits.__measured_values
 
-    def isSymbolic(self):
-        return Qubits.__symbolic == True
-
     def setPsi(self, psi):
         Qubits.__psi = psi
 
@@ -111,19 +99,19 @@ class Qubits(Hilbert):
         return Qubits.__psi
 
     def getDictPsi(self):
-        size_p = self.__q_number
+        size_p = self.getQubitsNumber()
         size = 2 ** size_p
         labels = ["{0:b}".format(i).zfill(size_p) for i in range(size)]
-        if (self.__symbolic):
-            value_l = [Utils.textSymbolfix(str(value), self.__q_number, Qubits.first_left) for value in Qubits.__psi.get()]
+        if not self.getCuda():
+            value_l = [Utils.textSymbolfix(str(value), self.getQubitsNumber(), self.isFirstLeft()) for value in Qubits.__psi.get()]
             dictPsi = {label: value_l[i] for i, label in enumerate(labels)}
         else:
             dictPsi = {label: Qubits.__psi.get()[i].item() for i, label in enumerate(labels)}
         return dictPsi
 
-    def getPsiAtAngles(self, degree = False):
+    def getPsiAtAngles(self, degree=False):
         angles = []
-        if (not Qubits.__symbolic):
+        if self.getCuda():
             angles = cp.angle(Qubits.__psi.get())
             if(degree):
                 angles = angles*180/pi
@@ -147,56 +135,56 @@ class Qubits(Hilbert):
         return result
 
     def setSymbolValuesForAll(self, a, b):
-        if(Qubits.__symbolic):
-            for i in range(1, Qubits.__q_number+1):
-                if (Qubits.first_left):
+        if not self.getCuda():
+            for i in range(1, self.getNumberOfQubits()+1):
+                if (self.isFirstLeft()):
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_0", a), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_1", a), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_0", b), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_1", b), False)
                 else:
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"b"+str(i)+"_1", b), False)
         else:
             print("This session is not symbolic!")
 
     def setSymbolValuesForListId(self, id, a, b):
-        if(Qubits.__symbolic):
+        if not self.getCuda():
             list_id = self.qubitsToList(id)
             for i in list_id:
-                if (Qubits.__first_left):
+                if (self.isFirstLeft()):
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_0", a), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"a"+str(i)+"_1", a), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_0", b), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+"b"+str(i)+"_1", b), False)
                 else:
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_0", a), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"a"+str(i)+"_1", a), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_0", b), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+"b"+str(i)+"_1", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"a"+str(i)+"_0", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"a"+str(i)+"_1", a), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"b"+str(i)+"_0", b), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+"b"+str(i)+"_1", b), False)
         else:
             print("This session is not symbolic!")
 
     def setSymbolValue(self, id, symbol, value):
-        if(Qubits.__symbolic):
+        if not self.getCuda():
             list_id = self.qubitsToList(id)
             for i in list_id:
-                if (Qubits.__first_left):
+                if self.isFirstLeft():
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+symbol+str(i)+"_0", value), False)
                     Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(i)+symbol+str(i)+"_1", value), False)
                 else:
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_0", value), False)
-                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(Qubits.__q_number+1-i)+symbol+str(i)+"_1", value), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+symbol+str(i)+"_0", value), False)
+                    Qubits.__psi = Matrix(Qubits.__psi.get().subs(str(self.getNumberOfQubits()+1-i)+symbol+str(i)+"_1", value), False)
         else:
             print("This session is not symbolic!")
 
     def PrintState(self, simple = False):
-        if(not self.__symbolic):
+        if self.getCuda():
             value = Utils.vec2tex(Qubits.__psi.get())
         else:
-            value = Utils.texfix(Qubits.__psi.get(), self.__q_number, Qubits.__first_left)
+            value = Utils.texfix(Qubits.__psi.get(), self.getNumberOfQubits(), self.isFirstLeft())
 
         if(not simple):
             display(Math(value))
@@ -215,7 +203,6 @@ class Qubit(Qubits, Gates, Circuit):
     def __init__(self, id = None):
         self.__id = self.addQubit(id)
         self.__name = "q"+str(self.__id)
-        self.setFirstLeft(self.isFirstLeft())
         Gates.__init__(self, self.getQubitsNumber())
 
     def __eq__(self, other):

@@ -18,12 +18,7 @@ from logicqubit.utils import *
 
 class Hilbert():
     __cuda = True
-
-    def setCuda(self, cuda):
-        Hilbert.__cuda = cuda
-
-    def getCuda(self):
-        return Hilbert.__cuda
+    __first_left = True
 
     def ket(self, value, d=2):
         result = Matrix([[Utils.onehot(i, value)] for i in range(d)], Hilbert.__cuda)
@@ -46,6 +41,24 @@ class Hilbert():
         for M in list[1:]:
             A = A.kron(M)
         return A
+
+    def setNumberOfQubits(self, number):
+        Hilbert.__number_of_qubits = number
+
+    def getNumberOfQubits(self):
+        return Hilbert.__number_of_qubits
+
+    def setCuda(self, cuda):
+        Hilbert.__cuda = cuda
+
+    def getCuda(self):
+        return Hilbert.__cuda
+
+    def setFirstLeft(self, value):
+        Hilbert.__first_left = value
+
+    def isFirstLeft(self):
+        return Hilbert.__first_left
 
 
 class Matrix:
