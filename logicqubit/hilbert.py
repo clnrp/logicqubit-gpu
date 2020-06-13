@@ -17,47 +17,75 @@ from logicqubit.utils import *
 
 
 class Hilbert():
+    __number_of_qubits = 1
     __cuda = True
     __first_left = True
 
-    def ket(self, value, d=2):
-        result = Matrix([[Utils.onehot(i, value)] for i in range(d)], Hilbert.__cuda)
+    @staticmethod
+    def ket(value):
+        result = Matrix([[Utils.onehot(i, value)] for i in range(2)], Hilbert.__cuda)
         return result
 
-    def bra(self, value, d=2):
-        result = Matrix([Utils.onehot(i, value) for i in range(d)], Hilbert.__cuda)
+    @staticmethod
+    def bra(value):
+        result = Matrix([Utils.onehot(i, value) for i in range(2)], Hilbert.__cuda)
         return result
 
-    def getAdjoint(self, psi):
+    @staticmethod
+    def getState():
+        if Hilbert.getCuda():
+            state = Hilbert.kronProduct([Hilbert.ket(0) for i in range(Hilbert.getNumberOfQubits())])
+        else:
+            if Hilbert.isFirstLeft():
+                a = sp.symbols([str(i) + "a" + str(i) + "_0" for i in range(1, Hilbert.getNumberOfQubits() + 1)])
+                b = sp.symbols([str(i) + "b" + str(i) + "_1" for i in range(1, Hilbert.getNumberOfQubits() + 1)])
+            else:
+                a = sp.symbols([str(Hilbert.getNumberOfQubits() + 1 - i) + "a" + str(i) + "_0" for i in
+                                reversed(range(1, Hilbert.getNumberOfQubits() + 1))])
+                b = sp.symbols([str(Hilbert.getNumberOfQubits() + 1 - i) + "b" + str(i) + "_1" for i in
+                                reversed(range(1, Hilbert.getNumberOfQubits() + 1))])
+            state = Hilbert.kronProduct([Hilbert.ket(0) * a[i] + Hilbert.ket(1) * b[i] for i in range(Hilbert.getNumberOfQubits())])
+        return state
+
+    @staticmethod
+    def getAdjoint(psi):
         result = psi.adjoint()
         return result
 
-    def product(self, Operator, psi):
+    @staticmethod
+    def product(Operator, psi):
         result = Operator * psi
         return result
 
-    def kronProduct(self, list):  # produto de Kronecker
+    @staticmethod
+    def kronProduct(list):  # produto de Kronecker
         A = list[0]  # atua no qubit 1 que é o mais a esquerda
         for M in list[1:]:
             A = A.kron(M)
         return A
 
-    def setNumberOfQubits(self, number):
+    @staticmethod
+    def setNumberOfQubits(number):
         Hilbert.__number_of_qubits = number
 
-    def getNumberOfQubits(self):
+    @staticmethod
+    def getNumberOfQubits():
         return Hilbert.__number_of_qubits
 
-    def setCuda(self, cuda):
+    @staticmethod
+    def setCuda(cuda):
         Hilbert.__cuda = cuda
 
-    def getCuda(self):
+    @staticmethod
+    def getCuda():
         return Hilbert.__cuda
 
-    def setFirstLeft(self, value):
+    @staticmethod
+    def setFirstLeft(value):
         Hilbert.__first_left = value
 
-    def isFirstLeft(self):
+    @staticmethod
+    def isFirstLeft():
         return Hilbert.__first_left
 
 
@@ -72,7 +100,10 @@ class Matrix:
             else:
                 self.__matrix = sp.Matrix(matrix)
         else:
-            self.__matrix = matrix
+            if isinstance(matrix, Matrix):
+                self.__matrix = matrix.get()
+            else:
+                self.__matrix = matrix
 
     def __add__(self, other):
         result = self.__matrix + other.get()
