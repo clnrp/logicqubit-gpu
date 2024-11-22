@@ -7,6 +7,6 @@ from logicqubit import zhegalkin
 from logicqubit import oracle
 from logicqubit import synthesis
 
-__version__ = "1.5.5"
+__version__ = "1.6.0"
 
 print("logicqubit-gpu version "+__version__)

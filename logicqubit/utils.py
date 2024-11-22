@@ -6,8 +6,6 @@
 # Apache License
 
 import sympy as sp
-from sympy.physics.quantum import TensorProduct
-import cupy as cp
 
 class Utils:
 

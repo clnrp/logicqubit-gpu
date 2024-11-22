@@ -5,10 +5,6 @@
 # e-mail: cleonerp@gmail.com
 # Apache License
 
-import sympy as sp
-from sympy.physics.quantum import TensorProduct
-from IPython.display import display, Math, Latex
-
 from logicqubit.hilbert import *
 from logicqubit.gates import *
 from logicqubit.circuit import *
