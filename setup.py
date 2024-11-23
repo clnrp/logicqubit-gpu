@@ -26,8 +26,6 @@ def get_cupy_version():
         "11.": "cupy-cuda11x",
         "10.2": "cupy-cuda102",
     }
-    # Default fallback
-    default_cupy = "cupy"
     try:
         # Check CUDA version using nvcc
         cuda_version = os.popen("nvcc --version").read()
@@ -37,7 +35,13 @@ def get_cupy_version():
     except Exception as e:
         print(f"Warning: Unable to determine CUDA version. Using default cupy. Error: {e}", file=sys.stderr)
 
-    return default_cupy
+    return None
+
+cupy_version = get_cupy_version()
+
+requirements = ['sympy','numpy','matplotlib']
+if cupy_version is not None:
+    requirements.append(cupy_version)
 
 setup(
     name='logicqubit-gpu',
@@ -73,6 +77,6 @@ setup(
     ],
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['sympy','numpy',get_cupy_version(),'matplotlib'],
+    install_requires=requirements,
 
 )
