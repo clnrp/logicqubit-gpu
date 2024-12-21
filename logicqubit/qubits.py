@@ -295,8 +295,11 @@ class Qubit(Qubits, Gates, Circuit):
 
     # Two qubit gates
     # .......................................
-    # Two qubit gates
-    # .......................................
+    def CH(self, control):
+        self.addOp("CH", self.qubitsToList([control, self.__id]))
+        operator = super().CH(control, self.__id)
+        self.setOperation(operator)
+
     def CX(self, control):
         self.addOp("CX", self.qubitsToList([control, self.__id]))
         operator = super().CX(control, self.__id)
